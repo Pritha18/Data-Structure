@@ -87,16 +87,55 @@ Node* deleteNode(Node* root, int target)
 	return root;
 }
 
+bool search(Node* root, int target)
+{
+	if (NULL == root) {
+		return false;
+	}
+
+	if (target == root -> data) {
+		return true;
+	}
+
+	if (target < root -> data) {
+		return search(root -> left, target);
+	}
+
+	return search(root -> right, target);
+}
+
 void preOrder(Node* root)
 {
-    if(NULL == root)
-    {
-        return;
-    }
+	if(NULL == root)
+	{
+		return;
+	}
 
-    cout << root -> data << endl;
-    preOrder(root -> left);
-    preOrder(root -> right);
+	cout << root -> data << endl;
+	preOrder(root -> left);
+	preOrder(root -> right);
+}
+
+void inOrder(Node* root) {
+	if(NULL == root)
+	{
+		return;
+	}
+
+	inOrder(root -> left);
+	cout << root -> data << endl;
+	inOrder(root -> right);
+}
+
+void postOrder(Node* root) {
+	if(NULL == root)
+	{
+		return;
+	}
+
+	postOrder(root -> left);
+	postOrder(root -> right);
+	cout << root -> data << endl;
 }
 
 int main(int argc, char const *argv[])
