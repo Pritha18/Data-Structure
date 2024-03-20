@@ -1,4 +1,3 @@
-
 /*
 	Not working 
 
@@ -29,25 +28,9 @@ struct Node
 	}
 };
 
+Node* root;
 
-Node* insertNode(Node* root, Node* newNode) 
-{
-	if (NULL == root) {
-		// creating new node and assign it to root
-		root = newNode; // creating new node with value
-		return root;
-	}
-
-	if (newNode -> data < root -> data) {
-		root -> left = insertNode(root -> left, newNode);
-	} else {
-		root -> right = insertNode(root -> right, newNode);
-	}
-
-	return root;
-}
-
-Node* leftRotate(Node* root, Node* node) {
+void leftRotate(Node* node) {
 	// getting the node -> parent
 	Node* parent = node -> parent;
 
@@ -85,11 +68,9 @@ Node* leftRotate(Node* root, Node* node) {
 	// make rightChild node the parent of node
 	rightChild -> left = node;
 	node -> parent = rightChild;
-
-	return root;
 }
 
-Node* rightRotate(Node* root, Node* node) {
+void rightRotate(Node* node) {
 	// getting the node -> parent
 	// Node* parent = node -> parent;
 
@@ -127,8 +108,6 @@ Node* rightRotate(Node* root, Node* node) {
 	// make leftChild node the parent of node
 	leftChild -> right = node;
 	node -> parent = leftChild;
-
-	return root;
 }
 
 Node* getUncle(Node* parent) {
@@ -143,7 +122,7 @@ Node* getUncle(Node* parent) {
 	return NULL;
 }
 
-Node* insertFix(Node* root, Node* node) {
+void insertFix(Node* node) {
 	Node* parent = node -> parent;
 
 	// Case 1: 
@@ -151,12 +130,12 @@ Node* insertFix(Node* root, Node* node) {
 	// the end of the recursion
 	if (NULL == parent) {
 		node -> color = BLACK;
-		return root;
+		return;
 	}
 
 	// Parent is black --> nothing to do
 	if (BLACK == parent -> color) {
-		return root;
+		return;
 	}
 
 	// From here on, parent is red
@@ -170,7 +149,7 @@ Node* insertFix(Node* root, Node* node) {
 
 	if (NULL == grandparent) {
 		parent -> color = BLACK;
-		return root;
+		return;
 	}
 
 	// From here on, there will be grandparent
@@ -186,14 +165,14 @@ Node* insertFix(Node* root, Node* node) {
 		// Call recursively for grandparent, which is now red.
 		// It might be root or have a red parent, in which case 
 		// we need to fix more
-		root = insertFix(root, grandparent);
+		insertFix(grandparent);
 	} else if (grandparent -> left == parent) {
 		// Parent is left child of grandparent
 
 		// Case 4a: Uncle is black and node is 
 		// left->right "inner child" of its grandparent
 		if (parent -> right == node) {
-			root = leftRotate(root, parent);
+			leftRotate(parent);
 
 			// Let "parent" point to the new root node 
 			// of the rotated sub-tree. It will be recolored in
@@ -204,7 +183,7 @@ Node* insertFix(Node* root, Node* node) {
 		// Case 5a:
 		// Uncle is black and node is left->left 
 		// "outer child" of its grandparent
-		root = rightRotate(root, grandparent);
+		rightRotate(grandparent);
 
 		// Recolor original parent and grandparent
 		parent -> color = BLACK;
@@ -216,7 +195,7 @@ Node* insertFix(Node* root, Node* node) {
 		// Uncle is black and node is right->left
 		// "inner child" of its grandparent
 		if (parent -> left == node) {
-			root = rightRotate(root, parent);
+			rightRotate(parent);
 
 			// Let "parent" point to the new root node 
 			// of the rotated sub-tree. It will be recolored
@@ -227,11 +206,26 @@ Node* insertFix(Node* root, Node* node) {
 		// Case 5b:
 		// Uncle is black and node is right->right
 		// "outer child" of its grandparent
-		root = leftRotate(root, grandparent);
+		leftRotate(grandparent);
 
 		// Recolor original parent and grandparent
 		parent -> color = BLACK;
 		grandparent -> color = RED;
+	}
+}
+
+Node* insertNode(Node* root, Node* newNode) 
+{
+	if (NULL == root) {
+		// creating new node and assign it to root
+		root = newNode; // creating new node with value
+		return root;
+	}
+
+	if (newNode -> data < root -> data) {
+		root -> left = insertNode(root -> left, newNode);
+	} else {
+		root -> right = insertNode(root -> right, newNode);
 	}
 
 	return root;
@@ -243,7 +237,7 @@ Node* insert(Node* root, int value) {
 
 	// passing the root and newNode
 	root = insertNode(root, newNode);
-	root = insertFix(root, newNode);
+	insertFix(newNode);
 
 	return root;
 }
@@ -260,9 +254,36 @@ void preOrder(Node* root)
 	preOrder(root -> right);
 }
 
+void printHelper(Node* travel, string indent, bool last) {
+	if (travel != NULL) {
+		cout << indent;
+		
+		if (last) {
+			cout << "R----";
+			indent += "   ";
+		} else {
+			cout << "L----";
+			indent += "|  ";
+		}
+
+		string sColor = travel -> color == RED ? "RED" : "BLACK";
+
+		cout << travel->data << "(" << sColor << ")" << endl;
+		printHelper(travel -> left, indent, false);
+		printHelper(travel -> right, indent, true);
+	}
+}
+
+void printTree() 
+{
+	if (root) {
+		printHelper(root, "", true);
+	}
+}
+
 int main(int argc, char const *argv[])
 {
-	Node* root = NULL;
+	root = NULL;
 
 	root = insert(root, 2);
 	root = insert(root, 3);
@@ -275,21 +296,9 @@ int main(int argc, char const *argv[])
 
 	preOrder(root);
 
+	cout << endl << endl;
+
+	printTree();
+
 	return 0;
 }
-
-
-/*
-	References
-
-	https://www.happycoders.eu/algorithms/red-black-tree-java/
-
-	https://www.codesdope.com/course/data-structures-red-black-trees-insertion/
-
-	https://www.programiz.com/dsa/red-black-tree
-
-	https://www.geeksforgeeks.org/introduction-to-red-black-tree/
-
-
-
-*/
