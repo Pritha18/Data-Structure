@@ -277,3 +277,4 @@ for item in sortedList:
     bst.insert(item)
 
 print(bst.get_height())
+print()
